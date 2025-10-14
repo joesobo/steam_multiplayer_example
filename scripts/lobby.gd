@@ -33,11 +33,15 @@ func _on_visibility_changed() -> void:
 		_player_names[my_id] = Steam.getPersonaName()
 		_player_ready[my_id] = false
 
-		# Broadcast our info to everyone
-		_rpc_register_player.rpc(my_id, Steam.getPersonaName(), false)
+		# Broadcast our info to everyone (deferred to ensure connection is ready)
+		call_deferred("_broadcast_player_info")
 
 		ready_button.text = "Ready"
 		_update_player_list()
+
+func _broadcast_player_info() -> void:
+	var my_id = multiplayer.get_unique_id()
+	_rpc_register_player.rpc(my_id, Steam.getPersonaName(), false)
 
 func _setup_footer() -> void:
 	var peer_count = multiplayer.get_peers().size() + 1
