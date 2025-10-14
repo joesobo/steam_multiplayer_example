@@ -34,8 +34,13 @@ func _on_visibility_changed() -> void:
 		for peer_id in multiplayer.get_peers():
 			_add_player(peer_id)
 
+		# Store our name and ready state in Steam lobby member data
 		Steam.setLobbyMemberData(_main.lobby_id, "ready", "false")
+		Steam.setLobbyMemberData(_main.lobby_id, "name", Steam.getPersonaName())
 		ready_button.text = "Ready"
+
+		# Tell all peers to refresh their UI
+		_rpc_update_lobby.rpc()
 
 func _setup_footer() -> void:
 	var peer_count = multiplayer.get_peers().size() + 1
@@ -89,17 +94,13 @@ func _get_player_name(peer_id: int) -> String:
 	# In SteamMultiplayerPeer, the peer ID IS the Steam ID for remote players
 	var steam_id: int
 	if peer_id == multiplayer.get_unique_id():
-		print(1)
 		steam_id = Steam.getSteamID()
 	else:
-		print(2)
-		# For remote peers, the peer_id is their Steam ID
 		steam_id = peer_id
 
-	# Get their Steam persona name
-	if steam_id > 0:
-		print(3)
-		var player_name = Steam.getFriendPersonaName(steam_id)
+	# Get their name from lobby member data (not Steam friends API)
+	if steam_id > 0 and _main and _main.lobby_id > 0:
+		var player_name = Steam.getLobbyMemberData(_main.lobby_id, steam_id, "name")
 		if player_name != "":
 			return player_name
 
