@@ -32,9 +32,7 @@ func toggle_ui(show_lobby: bool) -> void:
 	lobbies_container.visible = !show_lobby
 
 func start_game() -> void:
-	# Only the host can spawn scenes
-	if multiplayer.is_server():
-		spawner.spawn(LEVEL_SCENE)
+	spawner.spawn(LEVEL_SCENE)
 
 
 func _on_host_pressed() -> void:
