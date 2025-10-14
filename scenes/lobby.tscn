@@ -1,0 +1,115 @@
+[gd_scene load_steps=3 format=3 uid="uid://br8q1w7vl1ehl"]
+
+[ext_resource type="Script" uid="uid://dp4jk3m8oat5h" path="res://scripts/lobby.gd" id="1_j3k4o"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Lobby" type="Panel" node_paths=PackedStringArray("players_list", "ready_button", "leave_button", "peer_count_label", "peer_id_label", "steam_id_label", "lobby_id_label", "role_label")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_1")
+script = ExtResource("1_j3k4o")
+players_list = NodePath("MarginContainer/VBoxContainer/ScrollContainer/PlayersList")
+ready_button = NodePath("MarginContainer/VBoxContainer/ButtonsContainer/ReadyButton")
+leave_button = NodePath("MarginContainer/VBoxContainer/ButtonsContainer/LeaveButton")
+peer_count_label = NodePath("MarginContainer/VBoxContainer/FooterContainer/PeerCountLabel")
+peer_id_label = NodePath("MarginContainer/VBoxContainer/FooterContainer/PeerIDLabel")
+steam_id_label = NodePath("MarginContainer/VBoxContainer/FooterContainer/SteamIDLabel")
+lobby_id_label = NodePath("MarginContainer/VBoxContainer/FooterContainer/LobbyIDLabel")
+role_label = NodePath("MarginContainer/VBoxContainer/FooterContainer/RoleLabel")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Lobby"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PlayersLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Players:"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayersList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="ReadyButton" type="Button" parent="MarginContainer/VBoxContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+text = "Ready"
+
+[node name="LeaveButton" type="Button" parent="MarginContainer/VBoxContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+text = "Leave Lobby"
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="FooterContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="PeerCountLabel" type="Label" parent="MarginContainer/VBoxContainer/FooterContainer"]
+layout_mode = 2
+text = "Peers: 0"
+
+[node name="PeerIDLabel" type="Label" parent="MarginContainer/VBoxContainer/FooterContainer"]
+layout_mode = 2
+text = "Peer ID: 0"
+
+[node name="SteamIDLabel" type="Label" parent="MarginContainer/VBoxContainer/FooterContainer"]
+layout_mode = 2
+text = "Steam ID: 0"
+
+[node name="LobbyIDLabel" type="Label" parent="MarginContainer/VBoxContainer/FooterContainer"]
+layout_mode = 2
+text = "Lobby ID: 0"
+
+[node name="RoleLabel" type="Label" parent="MarginContainer/VBoxContainer/FooterContainer"]
+layout_mode = 2
+text = "Role: -"

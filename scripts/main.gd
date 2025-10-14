@@ -6,13 +6,16 @@ const LEVEL_SCENE = "res://scenes/level.tscn"
 @export var refresh_button: Button
 @export var lobbies_container: VBoxContainer
 
-var _lobby_id: int = 0
+var lobby_id: int = 0
+
 var _peer := SteamMultiplayerPeer.new()
 
 @onready var spawner: MultiplayerSpawner = $MultiplayerSpawner
+@onready var lobby_ui: Panel = $CanvasLayer/VBoxContainer/Lobby
+@onready var main_ui: VBoxContainer = $CanvasLayer/VBoxContainer
 
 func _ready() -> void:
-	spawner.spawn_function = _spawn_level
+	spawner.spawn_function = _spawn_scene
 
 	host_button.pressed.connect(_on_host_pressed)
 	refresh_button.pressed.connect(_on_refresh_pressed)
@@ -21,21 +24,29 @@ func _ready() -> void:
 
 	_open_lobby_list()
 
+
+func toggle_ui(show_lobby: bool) -> void:
+	lobby_ui.visible = show_lobby
+	host_button.visible = !show_lobby
+	refresh_button.visible = !show_lobby
+	lobbies_container.visible = !show_lobby
+
+func start_game() -> void:
+	spawner.spawn(LEVEL_SCENE)
+
+
 func _on_host_pressed() -> void:
 	Steam.allowP2PPacketRelay(true)
 
 	_peer.create_lobby(SteamMultiplayerPeer.LOBBY_TYPE_PUBLIC)
 	multiplayer.multiplayer_peer = _peer
 
-	_hide_ui()
-
 func _on_lobby_created(connection: int, id: int) -> void:
 	if connection:
-		_lobby_id = id
-		Steam.setLobbyData(_lobby_id, "name", str(Steam.getPersonaName()) + "'s Lobby")
-		Steam.setLobbyJoinable(_lobby_id, true)
-
-		call_deferred("_spawn_level_deferred")
+		lobby_id = id
+		Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName()) + "'s Lobby")
+		Steam.setLobbyJoinable(lobby_id, true)
+		toggle_ui(true)
 
 func _on_lobby_match_list(lobbies: Array) -> void:
 	for lobby in lobbies:
@@ -54,24 +65,15 @@ func _on_refresh_pressed() -> void:
 
 	_open_lobby_list()
 
-func _hide_ui() -> void:
-	host_button.hide()
-	refresh_button.hide()
-	lobbies_container.hide()
-
 func _join_lobby(id: int) -> void:
 	_peer.connect_lobby(id)
 	multiplayer.multiplayer_peer = _peer
-	_lobby_id = id
-
-	_hide_ui()
+	lobby_id = id
+	toggle_ui(true)
 
 func _open_lobby_list() -> void:
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
 	Steam.requestLobbyList()
 
-func _spawn_level(data: String) -> Node:
+func _spawn_scene(data: String) -> Node:
 	return (load(data) as PackedScene).instantiate()
-
-func _spawn_level_deferred() -> void:
-	spawner.spawn(LEVEL_SCENE)

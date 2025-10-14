@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://c6blwgu3m45et"]
+[gd_scene load_steps=3 format=3 uid="uid://c6blwgu3m45et"]
 
 [ext_resource type="Script" uid="uid://bqn3hdv0ehjny" path="res://scripts/main.gd" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://br8q1w7vl1ehl" path="res://scenes/lobby.tscn" id="2_0wfyh"]
 
 [node name="Main" type="Node2D" node_paths=PackedStringArray("host_button", "refresh_button", "lobbies_container")]
 script = ExtResource("1_o5qli")
@@ -26,6 +27,10 @@ layout_mode = 2
 text = "Refresh"
 
 [node name="Lobbies" type="VBoxContainer" parent="CanvasLayer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Lobby" parent="CanvasLayer/VBoxContainer" instance=ExtResource("2_0wfyh")]
+visible = false
 layout_mode = 2
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
