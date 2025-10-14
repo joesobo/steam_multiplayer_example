@@ -64,7 +64,7 @@ func _update_player_list() -> void:
 		var container = HBoxContainer.new()
 
 		var name_label = Label.new()
-		name_label.text = _get_player_name(peer_id)
+		name_label.text = Steam.getPersonaName()
 		name_label.custom_minimum_size = Vector2(200, 0)
 		container.add_child(name_label)
 
@@ -74,12 +74,6 @@ func _update_player_list() -> void:
 		container.add_child(status_label)
 
 		players_list.add_child(container)
-
-func _get_player_name(peer_id: int) -> String:
-	# Get name from Steam for local player, or use peer ID for others
-	if peer_id == multiplayer.get_unique_id():
-		return Steam.getPersonaName()
-	return "Player " + str(peer_id)
 
 func _on_ready_pressed() -> void:
 	var my_id = multiplayer.get_unique_id()
