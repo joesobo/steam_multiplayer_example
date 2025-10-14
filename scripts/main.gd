@@ -22,18 +22,20 @@ func _ready() -> void:
 	_open_lobby_list()
 
 func _on_host_pressed() -> void:
+	Steam.allowP2PPacketRelay(true)
+
 	_peer.create_lobby(SteamMultiplayerPeer.LOBBY_TYPE_PUBLIC)
 	multiplayer.multiplayer_peer = _peer
 
 	_hide_ui()
-
-	call_deferred("_spawn_level_deferred")
 
 func _on_lobby_created(connection: int, id: int) -> void:
 	if connection:
 		_lobby_id = id
 		Steam.setLobbyData(_lobby_id, "name", str(Steam.getPersonaName()) + "'s Lobby")
 		Steam.setLobbyJoinable(_lobby_id, true)
+
+		call_deferred("_spawn_level_deferred")
 
 func _on_lobby_match_list(lobbies: Array) -> void:
 	for lobby in lobbies:
