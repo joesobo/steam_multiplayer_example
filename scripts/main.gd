@@ -1,6 +1,6 @@
 extends Node
 
-const LEVEL_SCENE = preload("res://scenes/level.tscn")
+const LEVEL_SCENE = "res://scenes/level.tscn"
 
 var lobby_id = 0
 var peer = SteamMultiplayerPeer.new()
@@ -14,6 +14,8 @@ var peer = SteamMultiplayerPeer.new()
 func _ready() -> void:
 	spawner.spawn_function = spawn_level
 
+	host_button.pressed.connect(_on_host_pressed)
+	refresh_button.pressed.connect(_on_refresh_pressed)
 	peer.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
 
@@ -63,11 +65,11 @@ func join_lobby(id: int) -> void:
 	_hide_ui()
 
 func open_lobby_list() -> void:
-	print(2)
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
 	Steam.requestLobbyList()
 
 func spawn_level(data) -> Node:
+	print(data)
 	return (load(data) as PackedScene).instantiate()
 
 func spawn_level_deferred() -> void:

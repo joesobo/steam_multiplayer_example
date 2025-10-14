@@ -1,9 +1,8 @@
 extends Node
 
 func _ready() -> void:
-	print(1)
-	OS.set_environment("SteamAppID", "480")
-	OS.set_environment("SteamGameID", "480")
+	OS.set_environment("SteamAppID", "3569650")
+	OS.set_environment("SteamGameID", "3569650")
 
 	Steam.steamInitEx()
 

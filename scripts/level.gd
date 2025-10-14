@@ -1,7 +1,7 @@
 extends Node
 
 const LOADING_SCENE = preload("res://scenes/loading.tscn")
-const GAME_SCENE = preload("res://scenes/game.tscn")
+const GAME_SCENE = "res://scenes/game.tscn"
 
 var loading_instance
 var scene_to_load = GAME_SCENE
