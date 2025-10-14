@@ -12,12 +12,12 @@ func _ready() -> void:
 		multiplayer.peer_connected.connect(spawn)
 		multiplayer.peer_disconnected.connect(remove_player)
 
-func spawn_player(data) -> Node:
+func spawn_player(data: int) -> Node:
 	var player = player_scene.instantiate()
 	player.set_multiplayer_authority(data)
 	players[data] = player
 	return player
 
-func remove_player(data) -> void:
+func remove_player(data: int) -> void:
 	players[data].queue_free()
 	players.erase(data)
