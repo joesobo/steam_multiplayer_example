@@ -91,17 +91,9 @@ func _update_player_list() -> void:
 		players_list.add_child(container)
 
 func _get_player_name(peer_id: int) -> String:
-	var steam_id: int
-	if peer_id == multiplayer.get_unique_id():
-		steam_id = Steam.getSteamID()
-	else:
-		steam_id = peer_id
-
-	# Try to get the name from lobby member data
-	if steam_id > 0 and _main and _main.lobby_id > 0:
-		var player_name = Steam.getLobbyMemberData(_main.lobby_id, steam_id, "name")
-		if player_name != "":
-			return player_name
+	var player_name = Steam.getLobbyMemberData(_main.lobby_id, Steam.getSteamID(), "name")
+	if player_name != "":
+		return player_name
 
 	return "Player " + str(peer_id)
 
