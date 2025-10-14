@@ -58,7 +58,7 @@ func _hide_ui() -> void:
 	lobbies_container.hide()
 
 func _join_lobby(id: int) -> void:
-	_peer.connect_to_lobby(id)
+	_peer.connect_lobby(id)
 	multiplayer.multiplayer_peer = _peer
 	_lobby_id = id
 
