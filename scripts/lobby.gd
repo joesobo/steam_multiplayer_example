@@ -10,6 +10,7 @@ extends Panel
 @export var role_label: Label
 
 var _players_ready: Dictionary = {} # peer_id -> bool
+var _player_names: Dictionary = {} # peer_id -> String
 var _main: Node
 
 func _ready() -> void:
@@ -28,6 +29,13 @@ func _on_visibility_changed() -> void:
 		_setup_footer()
 		_add_player(multiplayer.get_unique_id())
 
+		# Add all existing peers
+		for peer_id in multiplayer.get_peers():
+			_add_player(peer_id)
+
+		# Broadcast our name to all peers
+		_rpc_register_player.rpc(multiplayer.get_unique_id(), Steam.getPersonaName())
+
 func _setup_footer() -> void:
 	var peer_count = multiplayer.get_peers().size() + 1
 
@@ -40,6 +48,9 @@ func _setup_footer() -> void:
 func _on_peer_connected(peer_id: int) -> void:
 	_add_player(peer_id)
 	_setup_footer()
+
+	# Send our name to the new peer
+	_rpc_register_player.rpc_id(peer_id, multiplayer.get_unique_id(), Steam.getPersonaName())
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	_remove_player(peer_id)
@@ -54,6 +65,7 @@ func _add_player(peer_id: int) -> void:
 
 func _remove_player(peer_id: int) -> void:
 	_players_ready.erase(peer_id)
+	_player_names.erase(peer_id)
 	_update_player_list()
 
 func _update_player_list() -> void:
@@ -64,7 +76,7 @@ func _update_player_list() -> void:
 		var container = HBoxContainer.new()
 
 		var name_label = Label.new()
-		name_label.text = Steam.getPersonaName()
+		name_label.text = _get_player_name(peer_id)
 		name_label.custom_minimum_size = Vector2(200, 0)
 		container.add_child(name_label)
 
@@ -74,6 +86,11 @@ func _update_player_list() -> void:
 		container.add_child(status_label)
 
 		players_list.add_child(container)
+
+func _get_player_name(peer_id: int) -> String:
+	if _player_names.has(peer_id):
+		return _player_names[peer_id]
+	return "Player " + str(peer_id)
 
 func _on_ready_pressed() -> void:
 	var my_id = multiplayer.get_unique_id()
@@ -92,10 +109,16 @@ func _on_leave_pressed() -> void:
 		multiplayer.multiplayer_peer = null
 
 	_players_ready.clear()
+	_player_names.clear()
 	_update_player_list()
 
 	if _main:
 		_main.toggle_ui(false)
+
+@rpc("any_peer", "call_local")
+func _rpc_register_player(peer_id: int, player_name: String) -> void:
+	_player_names[peer_id] = player_name
+	_update_player_list()
 
 @rpc("any_peer", "call_local")
 func _rpc_set_ready(peer_id: int, is_ready: bool) -> void:
@@ -105,7 +128,7 @@ func _rpc_set_ready(peer_id: int, is_ready: bool) -> void:
 	if multiplayer.is_server():
 		_check_all_ready()
 
-@rpc("authority")
+@rpc("authority", "call_local")
 func _rpc_start_game() -> void:
 	if _main:
 		_main.start_game()
