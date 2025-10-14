@@ -9,8 +9,7 @@ extends Panel
 @export var lobby_id_label: Label
 @export var role_label: Label
 
-var _players_ready: Dictionary = {} # peer_id -> bool
-var _player_names: Dictionary = {} # peer_id -> String
+var _players: Array[int] = [] # List of peer IDs in the lobby
 var _main: Node
 
 func _ready() -> void:
@@ -27,14 +26,17 @@ func _ready() -> void:
 func _on_visibility_changed() -> void:
 	if visible:
 		_setup_footer()
+
+		# Add ourselves
 		_add_player(multiplayer.get_unique_id())
 
 		# Add all existing peers
 		for peer_id in multiplayer.get_peers():
 			_add_player(peer_id)
 
-		# Broadcast our name to all peers
-		_rpc_register_player.rpc(multiplayer.get_unique_id(), Steam.getPersonaName())
+		# Set our ready state to false
+		Steam.setLobbyMemberData(_main.lobby_id, "ready", "false")
+		ready_button.text = "Unready"
 
 func _setup_footer() -> void:
 	var peer_count = multiplayer.get_peers().size() + 1
@@ -49,30 +51,26 @@ func _on_peer_connected(peer_id: int) -> void:
 	_add_player(peer_id)
 	_setup_footer()
 
-	# Send our name to the new peer
-	_rpc_register_player.rpc_id(peer_id, multiplayer.get_unique_id(), Steam.getPersonaName())
-
 func _on_peer_disconnected(peer_id: int) -> void:
 	_remove_player(peer_id)
 	_setup_footer()
 
 func _add_player(peer_id: int) -> void:
-	if _players_ready.has(peer_id):
+	if peer_id in _players:
 		return
 
-	_players_ready[peer_id] = false
+	_players.append(peer_id)
 	_update_player_list()
 
 func _remove_player(peer_id: int) -> void:
-	_players_ready.erase(peer_id)
-	_player_names.erase(peer_id)
+	_players.erase(peer_id)
 	_update_player_list()
 
 func _update_player_list() -> void:
 	for child in players_list.get_children():
 		child.queue_free()
 
-	for peer_id in _players_ready.keys():
+	for peer_id in _players:
 		var container = HBoxContainer.new()
 
 		var name_label = Label.new()
@@ -81,48 +79,66 @@ func _update_player_list() -> void:
 		container.add_child(name_label)
 
 		var status_label = Label.new()
-		status_label.text = "✓ Ready" if _players_ready[peer_id] else "⏳ Not Ready"
+		var is_ready = _get_player_ready_state(peer_id)
+		status_label.text = "✓ Ready" if is_ready else "⏳ Not Ready"
 		status_label.custom_minimum_size = Vector2(100, 0)
 		container.add_child(status_label)
 
 		players_list.add_child(container)
 
 func _get_player_name(peer_id: int) -> String:
-	if _player_names.has(peer_id):
-		return _player_names[peer_id]
+	var steam_id: int
+	if peer_id == multiplayer.get_unique_id():
+		steam_id = Steam.getSteamID()
+	else:
+		steam_id = peer_id
+
+	if steam_id > 0:
+		var player_name = Steam.getFriendPersonaName(steam_id)
+		if player_name != "":
+			return player_name
+
 	return "Player " + str(peer_id)
 
-func _on_ready_pressed() -> void:
-	var my_id = multiplayer.get_unique_id()
-	_players_ready[my_id] = not _players_ready[my_id]
+func _get_player_ready_state(peer_id: int) -> bool:
+	var steam_id: int
+	if peer_id == multiplayer.get_unique_id():
+		steam_id = Steam.getSteamID()
+	else:
+		steam_id = peer_id
 
-	_rpc_set_ready.rpc(my_id, _players_ready[my_id])
-	ready_button.text = "Unready" if _players_ready[my_id] else "Ready"
+	if steam_id > 0:
+		var ready_str = Steam.getLobbyMemberData(_main.lobby_id, steam_id, "ready")
+		return ready_str == "true"
+
+	return false
+
+func _on_ready_pressed() -> void:
+	var new_state = !_get_player_ready_state(multiplayer.get_unique_id())
+
+	Steam.setLobbyMemberData(_main.lobby_id, "ready", "true" if new_state else "false")
+	ready_button.text = "Unready" if new_state else "Ready"
+
+	_rpc_update_lobby.rpc()
 	_update_player_list()
 
-	if multiplayer.is_server():
-		_check_all_ready()
-
 func _on_leave_pressed() -> void:
+	# Clear our ready state
+	if _main and _main.lobby_id > 0:
+		Steam.setLobbyMemberData(_main.lobby_id, "ready", "false")
+
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer.close()
 		multiplayer.multiplayer_peer = null
 
-	_players_ready.clear()
-	_player_names.clear()
+	_players.clear()
 	_update_player_list()
 
 	if _main:
 		_main.toggle_ui(false)
 
 @rpc("any_peer", "call_local")
-func _rpc_register_player(peer_id: int, player_name: String) -> void:
-	_player_names[peer_id] = player_name
-	_update_player_list()
-
-@rpc("any_peer", "call_local")
-func _rpc_set_ready(peer_id: int, is_ready: bool) -> void:
-	_players_ready[peer_id] = is_ready
+func _rpc_update_lobby() -> void:
 	_update_player_list()
 
 	if multiplayer.is_server():
@@ -131,15 +147,17 @@ func _rpc_set_ready(peer_id: int, is_ready: bool) -> void:
 @rpc("authority", "call_local")
 func _rpc_start_game() -> void:
 	if _main:
+		hide()
 		_main.start_game()
 
 func _check_all_ready() -> void:
-	if _players_ready.is_empty():
+	if _players.is_empty():
 		return
 
-	for is_ready in _players_ready.values():
-		if not is_ready:
+	for peer_id in _players:
+		if not _get_player_ready_state(peer_id):
 			return
 
 	# All players ready, start the game
+	print("All players ready! Starting game...")
 	_rpc_start_game.rpc()
