@@ -32,9 +32,9 @@ func try_register_player() -> void:
 
 		if multiplayer.multiplayer_peer and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
 			if !multiplayer.is_server():
-				print("CLIENT: Disabling button, starting sync")
 				ready_button.disabled = true
 				ready_button.text = "Syncing..."
+				await get_tree().process_frame
 
 			# Register ourselves
 			var my_id = multiplayer.get_unique_id()
@@ -42,13 +42,10 @@ func try_register_player() -> void:
 			_player_ready[my_id] = false
 
 			# Broadcast our info to everyone
-			print("Calling _rpc_register_player for ", my_id)
 			_rpc_register_player.rpc(my_id, Steam.getPersonaName(), false)
 
 			if !multiplayer.is_server():
-				print("CLIENT: Waiting for player_list_updated signal...")
 				await player_list_updated
-				print("CLIENT: Signal received! Re-enabling button")
 				ready_button.disabled = false
 				ready_button.text = "Ready"
 			else:
@@ -97,7 +94,6 @@ func _update_player_list() -> void:
 
 		players_list.add_child(container)
 
-	print("Emitting player_list_updated signal. Player count: ", _player_names.size())
 	player_list_updated.emit()
 
 func _on_ready_pressed() -> void:
