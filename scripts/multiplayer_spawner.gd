@@ -18,7 +18,7 @@ func _ready() -> void:
 func _spawn_player(id: int) -> Node:
 	var player = player_scene.instantiate()
 	player.set_multiplayer_authority(id)
-	player.position = Vector2(randi() % 101, randi() % 101)
+	player.global_position = Vector2(randi() % 1001, randi() % 1001)
 	in_game_players[id] = player
 	return player
 
