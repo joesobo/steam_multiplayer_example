@@ -9,7 +9,10 @@ func _ready() -> void:
 
 	if is_multiplayer_authority():
 		spawn(1)
-		multiplayer.peer_connected.connect(spawn)
+
+		for peer_id in multiplayer.get_peers():
+			spawn(peer_id)
+
 		multiplayer.peer_disconnected.connect(_remove_player)
 
 func _spawn_player(id: int) -> Node:
