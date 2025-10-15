@@ -21,6 +21,7 @@ func _ready() -> void:
 	refresh_button.pressed.connect(_on_refresh_pressed)
 	_peer.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
+	multiplayer.connected_to_server.connect(_on_connected_to_server)
 
 	_open_lobby_list()
 
@@ -48,6 +49,9 @@ func _on_lobby_created(connection: int, id: int) -> void:
 		Steam.setLobbyJoinable(lobby_id, true)
 		toggle_ui(true)
 
+func _on_connected_to_server() -> void:
+	toggle_ui(true)
+
 func _on_lobby_match_list(lobbies: Array) -> void:
 	for lobby in lobbies:
 		var lobby_name = Steam.getLobbyData(lobby, "name")
@@ -69,7 +73,6 @@ func _join_lobby(id: int) -> void:
 	_peer.connect_lobby(id)
 	multiplayer.multiplayer_peer = _peer
 	lobby_id = id
-	toggle_ui(true)
 
 func _open_lobby_list() -> void:
 	Steam.addRequestLobbyListDistanceFilter(Steam.LOBBY_DISTANCE_FILTER_WORLDWIDE)
