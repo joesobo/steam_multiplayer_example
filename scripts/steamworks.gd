@@ -6,5 +6,7 @@ func _ready() -> void:
 
 	Steam.steamInitEx()
 
+	Steam.allowP2PPacketRelay(true)
+
 func _process(_delta: float) -> void:
 	Steam.run_callbacks()
