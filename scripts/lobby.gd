@@ -121,6 +121,7 @@ func _rpc_set_ready(peer_id: int, is_ready: bool) -> void:
 @rpc("authority", "call_local")
 func _rpc_start_game() -> void:
 	if _main:
+		hide()
 		_main.start_game()
 
 func _check_all_ready() -> void:
@@ -133,5 +134,4 @@ func _check_all_ready() -> void:
 
 	# All players ready, start the game
 	print("All players ready! Starting game...")
-	hide()
 	_rpc_start_game.rpc()
