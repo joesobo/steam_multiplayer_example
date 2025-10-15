@@ -8,7 +8,6 @@ func _ready() -> void:
 
 	Steam.allowP2PPacketRelay(true)
 
-	# Connect to Network Messages signals (not P2P signals)
 	Steam.network_messages_session_request.connect(_on_network_messages_session_request)
 	Steam.network_messages_session_failed.connect(_on_network_messages_session_failed)
 
