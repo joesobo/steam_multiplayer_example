@@ -20,7 +20,7 @@ func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 
-	# visibility_changed.connect(try_register_player)
+	visibility_changed.connect(try_register_player)
 
 	_main = get_tree().root.get_node_or_null("Main")
 
