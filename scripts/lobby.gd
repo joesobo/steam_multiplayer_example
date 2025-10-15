@@ -63,6 +63,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 func _update_player_list() -> void:
 	for child in players_list.get_children():
+		players_list.remove_child(child)
 		child.queue_free()
 
 	for peer_id in _player_names.keys():
