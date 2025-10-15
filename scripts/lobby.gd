@@ -26,16 +26,14 @@ func _ready() -> void:
 
 	_main = get_tree().root.get_node_or_null("Main")
 
+	ready_button.disabled = true
+	ready_button.text = "Syncing..."
+
 func try_register_player() -> void:
 	if visible:
 		_setup_footer()
 
 		if multiplayer.multiplayer_peer and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
-			if !multiplayer.is_server():
-				ready_button.disabled = true
-				ready_button.text = "Syncing..."
-				await get_tree().process_frame
-
 			# Register ourselves
 			var my_id = multiplayer.get_unique_id()
 			_player_names[my_id] = Steam.getPersonaName()
@@ -44,11 +42,13 @@ func try_register_player() -> void:
 			# Broadcast our info to everyone
 			_rpc_register_player.rpc(my_id, Steam.getPersonaName(), false)
 
-			if !multiplayer.is_server():
-				await player_list_updated
+			if multiplayer.is_server():
 				ready_button.disabled = false
 				ready_button.text = "Ready"
 			else:
+				ready_button.text = "Syncing..."
+				await player_list_updated
+				ready_button.disabled = false
 				ready_button.text = "Ready"
 
 
