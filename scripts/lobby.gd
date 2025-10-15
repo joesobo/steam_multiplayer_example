@@ -1,5 +1,7 @@
 extends Panel
 
+signal player_list_updated
+
 @export var players_list: VBoxContainer
 @export var ready_button: Button
 @export var leave_button: Button
@@ -39,6 +41,13 @@ func try_register_player() -> void:
 
 			ready_button.text = "Ready"
 			_update_player_list()
+
+			if !multiplayer.is_server():
+				ready_button.disabled = true
+				ready_button.text = "Syncing..."
+				await player_list_updated
+				ready_button.disabled = false
+				ready_button.text = "Ready"
 
 func _setup_footer() -> void:
 	var peer_count = multiplayer.get_peers().size() + 1
@@ -81,6 +90,8 @@ func _update_player_list() -> void:
 		container.add_child(status_label)
 
 		players_list.add_child(container)
+
+	player_list_updated.emit()
 
 func _on_ready_pressed() -> void:
 	var my_id = multiplayer.get_unique_id()
