@@ -118,9 +118,11 @@ func _rpc_set_ready(peer_id: int, is_ready: bool) -> void:
 	if multiplayer.is_server():
 		_check_all_ready()
 
-@rpc("authority")
+@rpc("authority", "call_local")
 func _rpc_start_game() -> void:
-	_main.start_game()
+	if _main:
+		hide()
+		_main.start_game()
 
 func _check_all_ready() -> void:
 	if _player_names.is_empty():
@@ -132,5 +134,4 @@ func _check_all_ready() -> void:
 
 	# All players ready, start the game
 	print("All players ready! Starting game...")
-	hide()
 	_rpc_start_game.rpc()
