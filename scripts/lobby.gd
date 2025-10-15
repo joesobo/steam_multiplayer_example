@@ -20,24 +20,25 @@ func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 
-	visibility_changed.connect(_on_visibility_changed)
+	# visibility_changed.connect(try_register_player)
 
 	_main = get_tree().root.get_node_or_null("Main")
 
-func _on_visibility_changed() -> void:
+func try_register_player() -> void:
 	if visible:
 		_setup_footer()
 
-		# Register ourselves
-		var my_id = multiplayer.get_unique_id()
-		_player_names[my_id] = Steam.getPersonaName()
-		_player_ready[my_id] = false
+		if multiplayer.multiplayer_peer and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+			# Register ourselves
+			var my_id = multiplayer.get_unique_id()
+			_player_names[my_id] = Steam.getPersonaName()
+			_player_ready[my_id] = false
 
-		# Broadcast our info to everyone
-		_rpc_register_player.rpc(my_id, Steam.getPersonaName(), false)
+			# Broadcast our info to everyone
+			_rpc_register_player.rpc(my_id, Steam.getPersonaName(), false)
 
-		ready_button.text = "Ready"
-		_update_player_list()
+			ready_button.text = "Ready"
+			_update_player_list()
 
 func _setup_footer() -> void:
 	var peer_count = multiplayer.get_peers().size() + 1

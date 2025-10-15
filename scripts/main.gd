@@ -21,6 +21,7 @@ func _ready() -> void:
 	refresh_button.pressed.connect(_on_refresh_pressed)
 	_peer.lobby_created.connect(_on_lobby_created)
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
+	multiplayer.connected_to_server.connect(_on_connected_to_server)
 
 	_open_lobby_list()
 
@@ -48,6 +49,10 @@ func _on_lobby_created(connection: int, id: int) -> void:
 		Steam.setLobbyData(lobby_id, "name", str(Steam.getPersonaName()) + "'s Lobby")
 		Steam.setLobbyJoinable(lobby_id, true)
 		toggle_ui(true)
+
+func _on_connected_to_server() -> void:
+	if lobby_ui.visible:
+		lobby_ui.try_register_player()
 
 func _on_lobby_match_list(lobbies: Array) -> void:
 	for lobby in lobbies:
