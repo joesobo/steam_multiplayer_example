@@ -72,6 +72,7 @@ func _on_refresh_pressed() -> void:
 	_open_lobby_list()
 
 func _join_lobby(id: int) -> void:
+	Steam.allowP2PPacketRelay(true)
 	_peer.connect_lobby(id)
 	multiplayer.multiplayer_peer = _peer
 	lobby_id = id
