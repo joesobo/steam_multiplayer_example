@@ -39,15 +39,16 @@ func try_register_player() -> void:
 			# Broadcast our info to everyone
 			_rpc_register_player.rpc(my_id, Steam.getPersonaName(), false)
 
-			ready_button.text = "Ready"
-			_update_player_list()
-
 			if !multiplayer.is_server():
 				ready_button.disabled = true
 				ready_button.text = "Syncing..."
 				await player_list_updated
 				ready_button.disabled = false
 				ready_button.text = "Ready"
+			else:
+				ready_button.text = "Ready"
+				_update_player_list()
+
 
 func _setup_footer() -> void:
 	var peer_count = multiplayer.get_peers().size() + 1
