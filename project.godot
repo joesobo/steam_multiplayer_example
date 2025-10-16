@@ -21,4 +21,4 @@ Steamworks="*res://scripts/steamworks.gd"
 
 [steam]
 
-initialization/app_id=3569650
+initialization/app_id=480
